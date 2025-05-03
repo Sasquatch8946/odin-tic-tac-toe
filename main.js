@@ -58,13 +58,11 @@ const checks = (function (board) {
         let win = false;
         const isEqual = (row) => row.every(mark => mark === row[0] && mark !== null);
         board.forEach((row) => {
-            console.log(isEqual(row));
             if (isEqual(row)) {
                 win = true;
             }
         });
 
-        console.log(win);
 
         if (win) {
             console.log("we have a winner! A row is equal")
@@ -73,7 +71,22 @@ const checks = (function (board) {
         }
     }
     function isColumnEqual(board) {
-        //
+        let win = false;
+        for (let col = 0; col < 3; col++) {
+            const isEqual = board.every(row => row[col] === board[0][col] && row[col] !== null);
+            if (isEqual) {
+                win = true;
+            }
+
+            
+
+        }
+
+        if (win) {
+            console.log("we have a winner! A column is equal")
+        } else {
+            console.log("no column is equal");
+        }
     }
     function isDiagnoalEqual(board) {
         //
@@ -81,6 +94,7 @@ const checks = (function (board) {
 
     return {
         isRowEqual,
+        isColumnEqual,
     }
 
     
