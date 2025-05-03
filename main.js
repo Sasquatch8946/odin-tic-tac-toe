@@ -8,8 +8,15 @@ const game = (function () {
         return gameboard;
     }
 
+    players = [];
+    const p1 = createPlayer(0);
+    const p2 = createPlayer(1);
+    players.push(p1);
+    players.push(p2);
+
     return { 
         gameboard,
+        players,
     }
 
 })();
@@ -18,9 +25,9 @@ function createPlayer (id) {
     let score = 0;
     var mark;
 
-    if (id === 1) {
+    if (id === 0) {
         mark = 'x';
-    } else if (id === 2) {
+    } else if (id === 1) {
         mark = 'o';
     }
     function playTurn(gameboard, row, column, mark) {
@@ -40,14 +47,35 @@ function createPlayer (id) {
     }
 }
 
-function controlFlow() {
-    let turns = [];
-    
-    while (!isGameWon()) {
-        if (!turns) {
-            turns.push(1);
-            console.log("Player 1's turn");
+function controlFlow(board) {
+    let currentPlayer = 0;
+    let input;    
+    let quit = false;
+    let row;
+    let col;
+    while (!isGameWon(board) && !quit) {
+        if (currentPlayer === 0) {
+            console.log("It's player 1's turn.");
+            input = prompt("enter coordinates:");
+            console.log(`player 1 entered: ${input}`);
+            [row, col] = input.split(' ');
+            game.players[currentPlayer].playTurn(board, row, col);
+            currentPlayer = 1;
+        } else if (currentPlayer === 1) {
+            console.log("It's player 2's turn.");
+            input = prompt("enter coordinates:");
+            console.log(`player 2 entered: ${input}`);
+            [row, col] = input.split(' ');
+            game.players[currentPlayer].playTurn(board, row, col);
+            currentPlayer = 0;
         }
+
+
+        
+        if (input === 'q') {
+            quit = true;
+        }
+
     }
 }
 
@@ -66,8 +94,10 @@ const checks = (function (board) {
 
         if (win) {
             console.log("we have a winner! A row is equal")
+            return true;
         } else {
             console.log("no row is equal");
+            return false;
         }
     }
     function isColumnEqual(board) {
@@ -84,22 +114,65 @@ const checks = (function (board) {
 
         if (win) {
             console.log("we have a winner! A column is equal")
+            return true;
         } else {
             console.log("no column is equal");
+            return false;
         }
     }
-    function isDiagnoalEqual(board) {
-        //
+    function isDiagonalEqual(board) {
+        function isDiagonal1Equal(board) {
+            return board[0][0] === board[1][1] && 
+                board[1][1] === board[2][2] && 
+                board[0][0] !== null;
+        }
+        function isDiagonal2Equal(board) {
+            return board[0][3] === board[1][1] && 
+            board[1][1] === board[2][0] &&
+            board[0][3] !== null;
+        }
+
+        if (isDiagonal1Equal(board) || isDiagonal2Equal(board)) {
+            console.log("we have a winner! A diagonal is equal.");
+            return true;
+        } else {
+            console.log("no diagonal is equal");
+            return false;
+        }
+    }
+    function isBoardFull(board) {
+
+        let isBoardFull = true;
+        const isRowFull = (row) => row.every(mark => mark !== null);
+        board.forEach((row) => {
+            if (!isRowFull(row)) {
+                isBoardFull = false;
+            }
+        });
+
+        console.log(`is board full? ${isBoardFull}`);
     }
 
     return {
         isRowEqual,
         isColumnEqual,
+        isDiagonalEqual,
+        isBoardFull,
     }
 
     
 })();
 
+function isGameWon(board) {
+    if (checks.isRowEqual(board) ||
+        checks.isColumnEqual(board) ||
+        checks.isDiagonalEqual(board)) {
+            console.log("game is won!");
+    } else if (checks.isBoardFull(board)) {
+        console.log("game has not been won yet, but board is full. Game over.");
+    } else {
+        console.log("Game has not been won yet and board isn't full. Keep playing.");
+    }
+}
+
 const board = game.gameboard();
-const player1 = createPlayer(1);
-const player2 = createPlayer(2);
