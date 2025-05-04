@@ -14,9 +14,42 @@ const game = (function () {
     players.push(p1);
     players.push(p2);
 
+    const playRound = (board) => {
+        let currentPlayer = 0;
+        let input;    
+        let quit = false;
+        let row;
+        let col;
+        while (!isGameWon(board) && !quit) {
+            if (currentPlayer === 0) {
+                console.log("It's player 1's turn.");
+                input = prompt("enter coordinates:");
+                console.log(`player 1 entered: ${input}`);
+                [row, col] = input.split(' ');
+                game.players[currentPlayer].playTurn(board, row, col);
+                currentPlayer = 1;
+            } else if (currentPlayer === 1) {
+                console.log("It's player 2's turn.");
+                input = prompt("enter coordinates:");
+                console.log(`player 2 entered: ${input}`);
+                [row, col] = input.split(' ');
+                game.players[currentPlayer].playTurn(board, row, col);
+                currentPlayer = 0;
+            }
+
+
+            
+            if (input === 'q') {
+                quit = true;
+            }
+
+        }
+
+    }
     return { 
         gameboard,
         players,
+        playRound,
     }
 
 })();
