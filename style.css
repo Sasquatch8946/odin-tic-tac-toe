@@ -1,12 +1,18 @@
+* {
+    margin: 0;
+    padding: 0;
+}
 .grid-container {
     display: grid;
     grid-template-columns: repeat(3, 100px);
     grid-template-rows: repeat(3, 100px);
 }
 
-.grid-container > div {
+.grid-container > button {
     background-color: lightgrey;
     border: 2px solid black;
+    font-size: 2rem;
+    font-weight: bold;
 }
 
 

@@ -1,11 +1,7 @@
 const game = (function () {
-    const gameboard = () => {
-        const gameboard = new Array(3);
-        for (let i = 0; i < 3; i++) {
-            gameboard[i] = new Array(3).fill(null);
-        }
-
-        return gameboard;
+    const gameboard = new Array(3);
+    for (let i = 0; i < 3; i++) {
+        gameboard[i] = new Array(3).fill(null);
     }
 
     players = [];
@@ -14,33 +10,50 @@ const game = (function () {
     players.push(p1);
     players.push(p2);
 
+    let currentPlayer = 0;
+
+    const getCurrentPlayer = () => {
+        if (currentPlayer === 0) {
+            console.log("Player 1's turn.");
+        } else if (currentPlayer === 1) {
+            console.log("Player 2's turn.");
+        }
+        return currentPlayer;
+    }
+
+    const changeCurrentPlayer = () => {
+        if (currentPlayer === 0) {
+            currentPlayer = 1;
+        } else if (currentPlayer === 1) {
+            currentPlayer = 0;
+        }
+
+        return currentPlayer;
+    }
+
+    const getBoard = () => {
+        return gameboard;
+    }
+
+    const setBoard = (row, column, mark) => {
+        let board = getBoard();
+        board[row][column] = mark;
+    }
+
     const playRound = (board) => {
-        let currentPlayer = 0;
+        let currentPlayer;
         let input;    
         let quit = false;
         let row;
         let col;
         while (!isGameWon(board) && !quit) {
+            currentPlayer = getCurrentPlayer();
             if (currentPlayer === 0) {
                 console.log("It's player 1's turn.");
-                input = prompt("enter coordinates:");
-                console.log(`player 1 entered: ${input}`);
-                [row, col] = input.split(' ');
-                game.players[currentPlayer].playTurn(board, row, col);
-                currentPlayer = 1;
+                waitForClick();
             } else if (currentPlayer === 1) {
                 console.log("It's player 2's turn.");
-                input = prompt("enter coordinates:");
-                console.log(`player 2 entered: ${input}`);
-                [row, col] = input.split(' ');
-                game.players[currentPlayer].playTurn(board, row, col);
-                currentPlayer = 0;
-            }
-
-
-            
-            if (input === 'q') {
-                quit = true;
+                waitForClick();
             }
 
         }
@@ -50,6 +63,12 @@ const game = (function () {
         gameboard,
         players,
         playRound,
+        getWaitStatus,
+        setWaitStatus,
+        getCurrentPlayer,
+        changeCurrentPlayer,
+        getBoard,
+        setBoard,
     }
 
 })();
@@ -66,10 +85,10 @@ function createPlayer (id) {
         mark = 'o';
         name = 'Player 2';
     }
-    function playTurn(gameboard, row, column, mark) {
+    function playTurn(gameboard, row, column) {
         const playerMark = getMark();
-        gameboard[row][column] = playerMark;
-        console.log(gameboard);
+        game.setBoard(row, column, playerMark);
+        console.log(game.getBoard());
     }
 
     function getMark() {
@@ -89,26 +108,19 @@ function createPlayer (id) {
 }
 
 function controlFlow(board) {
-    let currentPlayer = 0;
+    let currentPlayer;
     let input;    
     let quit = false;
     let row;
     let col;
     while (!isGameWon(board) && !quit) {
+        currentPlayer = game.getCurrentPlayer();
         if (currentPlayer === 0) {
             console.log("It's player 1's turn.");
-            input = prompt("enter coordinates:");
-            console.log(`player 1 entered: ${input}`);
-            [row, col] = input.split(' ');
-            game.players[currentPlayer].playTurn(board, row, col);
-            currentPlayer = 1;
+            waitForClick();
         } else if (currentPlayer === 1) {
             console.log("It's player 2's turn.");
-            input = prompt("enter coordinates:");
-            console.log(`player 2 entered: ${input}`);
-            [row, col] = input.split(' ');
-            game.players[currentPlayer].playTurn(board, row, col);
-            currentPlayer = 0;
+            waitForClick();        
         }
 
 
@@ -138,7 +150,7 @@ const checks = (function (board) {
             console.log("we have a winner! A row is equal")
             return { mark };
         } else {
-            console.log("no row is equal");
+            // console.log("no row is equal");
             return false;
         }
     }
@@ -160,7 +172,7 @@ const checks = (function (board) {
             console.log("we have a winner! A column is equal")
             return { mark };
         } else {
-            console.log("no column is equal");
+            // console.log("no column is equal");
             return false;
         }
     }
@@ -190,7 +202,7 @@ const checks = (function (board) {
             console.log("we have a winner! A diagonal is equal.");
             return isDiagonal1Equal(board) ? isDiagonal1Equal(board) : isDiagonal2Equal(board);
         } else {
-            console.log("no diagonal is equal");
+            // console.log("no diagonal is equal");
             return false;
         }
     }
@@ -204,7 +216,7 @@ const checks = (function (board) {
             }
         });
 
-        console.log(`is board full? ${isBoardFull}`);
+        // console.log(`is board full? ${isBoardFull}`);
     }
 
     return {
@@ -222,9 +234,9 @@ function isGameWon(board) {
     const isColumnEqual = checks.isColumnEqual(board);
     const isDiagonalEqual = checks.isDiagonalEqual(board);
     const checkResults = [isRowEqual, isColumnEqual, isDiagonalEqual];
-    console.log(checkResults);
+    // console.log(checkResults);
     const gameWon = checkResults.filter((result) => result != false);
-    console.log(gameWon);
+    // console.log(gameWon);
     let winner;
     if (gameWon.length === 1) {
         console.log("game is won!");
@@ -239,4 +251,76 @@ function isGameWon(board) {
     }
 }
 
-const board = game.gameboard();
+
+const squares = document.querySelectorAll('.square');
+squares.forEach((square) => {
+    square.addEventListener('click', (event) => {
+        const board = game.getBoard();
+        const currentPlayer = game.getCurrentPlayer();
+        const playerMark = game.players[currentPlayer].getMark();
+        const container = event.target.parentNode;
+        const indx = Array.prototype.indexOf.call(container.children, event.target);
+        console.log(indx);
+        const c = getCoords(indx); 
+        console.log(c);
+        if (board[c.row][c.col] === null) {
+            game.players[currentPlayer].playTurn(board, c.row, c.col);
+            game.changeCurrentPlayer();
+            displayController.updateDisplay(c.row, c.col, playerMark);
+            isGameWon(board);
+        } else {
+            console.log("oops a player already placed their marker there, try again");
+        }
+    });
+});
+
+
+function getCoords(indx) {
+    switch (true) {
+        case indx >= 0 && indx < 3:
+            row = 0;
+            col = indx;
+            return { row, col };        
+        case indx > 2 && indx < 6:
+            row = 1;
+            col = indx - 3;
+            return { row, col };
+        case indx > 5 && indx < 9: 
+            row = 2;
+            col = indx - 6;
+            return { row, col };
+        default:
+            return "something went wrong, couldn't get coords";
+    }
+
+}
+
+function convertCoordsToIndx(row, column) {
+    switch (row) {
+        case 0:
+            return column;
+        case 1: 
+            return column + 3;
+        case 2: 
+            return column + 6;
+    }
+}
+
+const displayController = (function () {
+    const updateDisplay = (row, column, mark) => {
+        console.log("update display");
+        const container = document.querySelector('.grid-container');
+        let indx = convertCoordsToIndx(row, column);
+        console.log(`indx: ${indx}`);
+        let cnArray = Array.from(container.childNodes);
+        let squares = cnArray.filter((cn) => cn.nodeName !== '#text');
+        let square = squares[indx];
+        console.log(square);
+        square.innerText = mark;
+    };
+
+
+    return {
+        updateDisplay,
+    };
+})();
