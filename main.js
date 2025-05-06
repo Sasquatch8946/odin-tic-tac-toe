@@ -196,9 +196,19 @@ const checks = (function (board) {
             }
         }
 
-        if (isDiagonal1Equal(board) || isDiagonal2Equal(board)) {
+        let mark; 
+
+        let test1 = isDiagonal1Equal(board);
+        let test2 = isDiagonal2Equal(board);
+
+        if (test1) {
+            mark = test1;
+        } else if (test2) {
+            mark = test2;
+        }
+        if (mark) {
             console.log("we have a winner! A diagonal is equal.");
-            return isDiagonal1Equal(board) ? isDiagonal1Equal(board) : isDiagonal2Equal(board);
+            return { mark }
         } else {
             // console.log("no diagonal is equal");
             return false;
