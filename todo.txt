@@ -2,3 +2,4 @@
 [] Make ControlFlow end game/reset values if game is won. Prompt user to play again.
 [] Debug code to find out why switch-case statement isn't firing inside of 
    event listener.
+[] diagonal win condition seems broken

@@ -63,8 +63,6 @@ const game = (function () {
         gameboard,
         players,
         playRound,
-        getWaitStatus,
-        setWaitStatus,
         getCurrentPlayer,
         changeCurrentPlayer,
         getBoard,
@@ -216,7 +214,7 @@ const checks = (function (board) {
             }
         });
 
-        // console.log(`is board full? ${isBoardFull}`);
+        return isBoardFull;
     }
 
     return {
@@ -245,7 +243,7 @@ function isGameWon(board) {
         console.log(`${winner[0].getName()} won!`);
 
     } else if (checks.isBoardFull(board)) {
-        console.log("game has not been won yet, but board is full. Game over.");
+        console.log("Game has not been won yet, but board is full. It's a tie!");
     } else {
         console.log("Game has not been won yet and board isn't full. Keep playing.");
     }
