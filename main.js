@@ -14,7 +14,7 @@ const game = (function () {
 
     const getCurrentPlayer = () => {
         
-        return players[currentPlayer].getName();
+        return currentPlayer;
     }
 
     const changeCurrentPlayer = () => {
@@ -23,6 +23,8 @@ const game = (function () {
         } else if (currentPlayer === 1) {
             currentPlayer = 0;
         }
+
+        displayController.updateStatusBar(`${players[currentPlayer].getName()}'s turn!`)
 
         return currentPlayer;
     }
@@ -36,34 +38,24 @@ const game = (function () {
         board[row][column] = mark;
     }
 
-    const playRound = (board) => {
-        let currentPlayer;
-        let input;    
-        let quit = false;
-        let row;
-        let col;
-        while (!isGameWon(board) && !quit) {
-            currentPlayer = getCurrentPlayer();
-            if (currentPlayer === 0) {
-                console.log("It's player 1's turn.");
-                waitForClick();
-            } else if (currentPlayer === 1) {
-                console.log("It's player 2's turn.");
-                waitForClick();
-            }
-
+    const resetBoard = () => {
+        let board = getBoard();
+        for (let i = 0; i < 3; i++) {
+            gameboard[i] = new Array(3).fill(null);
         }
+        currentPlayer = 0;
 
     }
+
 
     return { 
         gameboard,
         players,
-        playRound,
         getCurrentPlayer,
         changeCurrentPlayer,
         getBoard,
         setBoard,
+        resetBoard,
     }
 
 })();
@@ -109,7 +101,7 @@ function createPlayer (id) {
 }
 
 
-const checks = (function () {
+const checks = (function (board) {
 
     function isRowEqual(board) {
         let mark;
@@ -165,10 +157,10 @@ const checks = (function () {
             }
         }
         function isDiagonal2Equal(board) {
-        if (board[0][3] === board[1][1] && 
+        if (board[0][2] === board[1][1] && 
             board[1][1] === board[2][0] &&
-            board[0][3] !== null) {
-                return board[0][3];
+            board[0][2] !== null) {
+                return board[0][2];
             }
             else {
                 return false;
@@ -230,11 +222,14 @@ function isGameWon(board) {
         console.log(`player's mark ${gameWon[0].mark}`);
         winner = game.players.filter((p) => p.getMark() === gameWon[0].mark);
         console.log(`${winner[0].getName()} won!`);
+        return true;
 
     } else if (checks.isBoardFull(board)) {
         console.log("Game has not been won yet, but board is full. It's a tie!");
+        return false;
     } else {
         console.log("Game has not been won yet and board isn't full. Keep playing.");
+        return false;
     }
 }
 
@@ -252,11 +247,15 @@ squares.forEach((square) => {
         console.log(c);
         if (board[c.row][c.col] === null) {
             game.players[currentPlayer].playTurn(board, c.row, c.col);
-            game.changeCurrentPlayer();
             displayController.updateDisplay(c.row, c.col, playerMark);
-            isGameWon(board);
         } else {
             console.log("oops a player already placed their marker there, try again");
+        }
+
+        if (isGameWon(game.getBoard())) {
+            displayController.updateStatusBar(`Game over! ${game.players[currentPlayer].getName()} won!`);
+        } else {
+            game.changeCurrentPlayer();
         }
     });
 });
@@ -311,9 +310,19 @@ const displayController = (function () {
         statusBar.innerText = text;
     }
 
+    const clearDisplay = () => {
+        const gridContainer = document.querySelector('.grid-container');
+        const squares = Array.from(gridContainer.childNodes);
+        squares.forEach((sq) => {
+            sq.innerText = "";
+        });
+        updateStatusBar("");
+    }
+
     return {
         updateDisplay,
         updateStatusBar,
+        clearDisplay,
     };
 })();
 
@@ -329,4 +338,10 @@ startButton.addEventListener("click", () => {
     }
 
     displayController.updateStatusBar(`${game.players[0].getName()}'s turn!`);
+});
+
+const resetButton = document.querySelector('button[type="reset"]');
+resetButton.addEventListener("click", () => {
+    game.resetBoard();
+    displayController.clearDisplay();
 });
