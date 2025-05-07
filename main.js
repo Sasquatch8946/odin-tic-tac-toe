@@ -246,21 +246,21 @@ squares.forEach((square) => {
         if (board[c.row][c.col] === null) {
             game.players[currentPlayer].playTurn(c.row, c.col);
             displayController.updateDisplay(c.row, c.col, playerMark);
+            const gameOver = isGameOver(game.gameboard);
+            if (gameOver) {
+                if (gameOver.result === 'win') {
+                    game.players[currentPlayer].score++
+                    displayController.updateScore();
+                    displayController.updateStatusBar(gameOver.message);
+                } else if (gameOver.result ==='tie') {
+                    displayController.updateStatusBar(gameOver.message);
+                }
+            } else {
+                game.changeCurrentPlayer();
+            }
+
         } else {
             console.log("oops a player already placed their marker there, try again");
-        }
-        const gameOver = isGameOver(game.gameboard);
-
-        if (gameOver) {
-            if (gameOver.result === 'win') {
-                game.players[currentPlayer].score++
-                displayController.updateScore();
-                displayController.updateStatusBar(gameOver.message);
-            } else if (gameOver.result ==='tie') {
-                displayController.updateStatusBar(gameOver.message);
-            }
-        } else {
-            game.changeCurrentPlayer();
         }
     });
 });
