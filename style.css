@@ -61,4 +61,15 @@ input[type="text"] {
     font-weight: bold;
 }
 
+.score {
+    grid-row: 1;
+    grid-column: 1;
+    display: flex;
+    place-self: center;
+}
+
+.score > div {
+    padding: 10px;
+}
+
 

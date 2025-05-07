@@ -249,6 +249,8 @@ squares.forEach((square) => {
         const gameOver = isGameOver(game.gameboard);
 
         if (gameOver) {
+            game.players[currentPlayer].score++
+            displayController.updateScore();
             displayController.updateStatusBar(gameOver.result);
         } else {
             game.changeCurrentPlayer();
@@ -312,10 +314,16 @@ const displayController = (function () {
         updateStatusBar("");
     }
 
+    const updateScore = () => {
+        const scoreDiv = document.querySelector('.score>div:nth-child(2)');
+        scoreDiv.innerText = `${game.players[0].score}-${game.players[1].score}`;
+    }
+
     return {
         updateDisplay,
         updateStatusBar,
         clearDisplay,
+        updateScore,
     };
 })();
 
