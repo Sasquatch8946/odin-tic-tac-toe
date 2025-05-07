@@ -39,7 +39,6 @@ const game = (function () {
     }
 
     const resetBoard = () => {
-        let board = getBoard();
         for (let i = 0; i < 3; i++) {
             gameboard[i] = new Array(3).fill(null);
         }
@@ -72,10 +71,9 @@ function createPlayer (id) {
         mark = 'o';
         name = 'Player 2';
     }
-    function playTurn(gameboard, row, column) {
+    function playTurn(row, column) {
         const playerMark = getMark();
         game.setBoard(row, column, playerMark);
-        console.log(game.getBoard());
     }
 
     function getMark() {
@@ -101,7 +99,7 @@ function createPlayer (id) {
 }
 
 
-const checks = (function (board) {
+const checks = (function () {
 
     function isRowEqual(board) {
         let mark;
@@ -208,25 +206,24 @@ const checks = (function (board) {
     
 })();
 
-function isGameWon(board) {
+function isGameOver(board) {
     const isRowEqual = checks.isRowEqual(board);
     const isColumnEqual = checks.isColumnEqual(board);
     const isDiagonalEqual = checks.isDiagonalEqual(board);
     const checkResults = [isRowEqual, isColumnEqual, isDiagonalEqual];
-    // console.log(checkResults);
     const gameWon = checkResults.filter((result) => result != false);
-    // console.log(gameWon);
     let winner;
+    let result;
+
     if (gameWon.length === 1) {
-        console.log("game is won!");
-        console.log(`player's mark ${gameWon[0].mark}`);
         winner = game.players.filter((p) => p.getMark() === gameWon[0].mark);
-        console.log(`${winner[0].getName()} won!`);
-        return true;
+        result = `${winner[0].getName()} won!`;
+        return { result };
 
     } else if (checks.isBoardFull(board)) {
         console.log("Game has not been won yet, but board is full. It's a tie!");
-        return false;
+        result = "Game over! It's a tie!";
+        return { result };
     } else {
         console.log("Game has not been won yet and board isn't full. Keep playing.");
         return false;
@@ -237,23 +234,22 @@ function isGameWon(board) {
 const squares = document.querySelectorAll('.square');
 squares.forEach((square) => {
     square.addEventListener('click', (event) => {
-        const board = game.getBoard();
+        const board = game.gameboard;
         const currentPlayer = game.getCurrentPlayer();
         const playerMark = game.players[currentPlayer].getMark();
         const container = event.target.parentNode;
         const indx = Array.prototype.indexOf.call(container.children, event.target);
-        console.log(indx);
         const c = getCoords(indx); 
-        console.log(c);
         if (board[c.row][c.col] === null) {
-            game.players[currentPlayer].playTurn(board, c.row, c.col);
+            game.players[currentPlayer].playTurn(c.row, c.col);
             displayController.updateDisplay(c.row, c.col, playerMark);
         } else {
             console.log("oops a player already placed their marker there, try again");
         }
+        const gameOver = isGameOver(game.gameboard);
 
-        if (isGameWon(game.getBoard())) {
-            displayController.updateStatusBar(`Game over! ${game.players[currentPlayer].getName()} won!`);
+        if (gameOver) {
+            displayController.updateStatusBar(gameOver.result);
         } else {
             game.changeCurrentPlayer();
         }
@@ -294,14 +290,11 @@ function convertCoordsToIndx(row, column) {
 
 const displayController = (function () {
     const updateDisplay = (row, column, mark) => {
-        console.log("update display");
         const container = document.querySelector('.grid-container');
         let indx = convertCoordsToIndx(row, column);
-        console.log(`indx: ${indx}`);
         let cnArray = Array.from(container.childNodes);
         let squares = cnArray.filter((cn) => cn.nodeName !== '#text');
         let square = squares[indx];
-        console.log(square);
         square.innerText = mark;
     };
 
