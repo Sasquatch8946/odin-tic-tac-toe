@@ -214,16 +214,19 @@ function isGameOver(board) {
     const gameWon = checkResults.filter((result) => result != false);
     let winner;
     let result;
+    let message;
 
     if (gameWon.length === 1) {
         winner = game.players.filter((p) => p.getMark() === gameWon[0].mark);
-        result = `${winner[0].getName()} won!`;
-        return { result };
+        message = `${winner[0].getName()} won!`;
+        result = 'win';
+        return { message, result };
 
     } else if (checks.isBoardFull(board)) {
         console.log("Game has not been won yet, but board is full. It's a tie!");
-        result = "Game over! It's a tie!";
-        return { result };
+        message = "Game over! It's a tie!";
+        result = 'tie';
+        return { message, result };
     } else {
         console.log("Game has not been won yet and board isn't full. Keep playing.");
         return false;
@@ -249,9 +252,13 @@ squares.forEach((square) => {
         const gameOver = isGameOver(game.gameboard);
 
         if (gameOver) {
-            game.players[currentPlayer].score++
-            displayController.updateScore();
-            displayController.updateStatusBar(gameOver.result);
+            if (gameOver.result === 'win') {
+                game.players[currentPlayer].score++
+                displayController.updateScore();
+                displayController.updateStatusBar(gameOver.message);
+            } else if (gameOver.result ==='tie') {
+                displayController.updateStatusBar(gameOver.message);
+            }
         } else {
             game.changeCurrentPlayer();
         }
