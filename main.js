@@ -13,12 +13,8 @@ const game = (function () {
     let currentPlayer = 0;
 
     const getCurrentPlayer = () => {
-        if (currentPlayer === 0) {
-            console.log("Player 1's turn.");
-        } else if (currentPlayer === 1) {
-            console.log("Player 2's turn.");
-        }
-        return currentPlayer;
+        
+        return players[currentPlayer].getName();
     }
 
     const changeCurrentPlayer = () => {
@@ -59,6 +55,7 @@ const game = (function () {
         }
 
     }
+
     return { 
         gameboard,
         players,
@@ -97,40 +94,22 @@ function createPlayer (id) {
         return name;
     }
 
+    function setName(newName) {
+        name = newName;
+        return name;
+    }
+
     return { 
         score,
         playTurn,
         getMark,
         getName,
+        setName,
     }
 }
 
-function controlFlow(board) {
-    let currentPlayer;
-    let input;    
-    let quit = false;
-    let row;
-    let col;
-    while (!isGameWon(board) && !quit) {
-        currentPlayer = game.getCurrentPlayer();
-        if (currentPlayer === 0) {
-            console.log("It's player 1's turn.");
-            waitForClick();
-        } else if (currentPlayer === 1) {
-            console.log("It's player 2's turn.");
-            waitForClick();        
-        }
 
-
-        
-        if (input === 'q') {
-            quit = true;
-        }
-
-    }
-}
-
-const checks = (function (board) {
+const checks = (function () {
 
     function isRowEqual(board) {
         let mark;
@@ -327,8 +306,27 @@ const displayController = (function () {
         square.innerText = mark;
     };
 
+    const updateStatusBar = (text) => {
+        const statusBar = document.querySelector('.status-bar');
+        statusBar.innerText = text;
+    }
 
     return {
         updateDisplay,
+        updateStatusBar,
     };
 })();
+
+const startButton = document.querySelector("button[type='submit']");
+startButton.addEventListener("click", () => {
+    const nameFields = document.querySelectorAll("input[type='text']");
+    const nameFieldsArr = Array.from(nameFields);
+    for (let i = 0; i < nameFieldsArr.length; i++) {
+        let val = nameFieldsArr[i].value;
+        if (val) {
+            game.players[i].setName(val);
+        }
+    }
+
+    displayController.updateStatusBar(`${game.players[0].getName()}'s turn!`);
+});
