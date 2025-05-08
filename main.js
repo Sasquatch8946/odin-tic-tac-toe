@@ -46,6 +46,50 @@ const game = (function () {
 
     }
 
+    const resetScore = () => {
+        game.players.forEach((p) => p.score=0);
+        displayController.updateScore();
+    }
+
+    const playRound = (event) => {
+        const board = game.gameboard;
+        const currentPlayer = game.getCurrentPlayer();
+        const playerMark = game.players[currentPlayer].getMark();
+        const container = event.target.parentNode;
+        const indx = Array.prototype.indexOf.call(container.children, event.target);
+        const c = getCoords(indx); 
+        if (board[c.row][c.col] === null) {
+            game.players[currentPlayer].playTurn(c.row, c.col);
+            displayController.updateDisplay(c.row, c.col, playerMark);
+            const gameOver = isGameOver(game.gameboard);
+            if (gameOver) {
+                if (gameOver.result === 'win') {
+                    game.players[currentPlayer].score++
+                    displayController.updateScore();
+                    displayController.updateStatusBar(gameOver.message);
+                } else if (gameOver.result ==='tie') {
+                    displayController.updateStatusBar(gameOver.message);
+                }
+
+                game.end();
+
+            } else {
+                game.changeCurrentPlayer();
+            }
+
+        } else {
+            console.log("oops a player already placed their marker there, try again");
+        }
+
+    }
+
+    const end = () => {
+        const squares = document.querySelectorAll('.square');
+        squares.forEach((square) => {
+            square.removeEventListener('click', game.playRound);
+        });
+
+    }
 
     return { 
         gameboard,
@@ -55,6 +99,9 @@ const game = (function () {
         getBoard,
         setBoard,
         resetBoard,
+        playRound,
+        resetScore,
+        end,
     }
 
 })();
@@ -179,7 +226,6 @@ const checks = (function () {
             console.log("we have a winner! A diagonal is equal.");
             return { mark }
         } else {
-            // console.log("no diagonal is equal");
             return false;
         }
     }
@@ -234,36 +280,6 @@ function isGameOver(board) {
 }
 
 
-const squares = document.querySelectorAll('.square');
-squares.forEach((square) => {
-    square.addEventListener('click', (event) => {
-        const board = game.gameboard;
-        const currentPlayer = game.getCurrentPlayer();
-        const playerMark = game.players[currentPlayer].getMark();
-        const container = event.target.parentNode;
-        const indx = Array.prototype.indexOf.call(container.children, event.target);
-        const c = getCoords(indx); 
-        if (board[c.row][c.col] === null) {
-            game.players[currentPlayer].playTurn(c.row, c.col);
-            displayController.updateDisplay(c.row, c.col, playerMark);
-            const gameOver = isGameOver(game.gameboard);
-            if (gameOver) {
-                if (gameOver.result === 'win') {
-                    game.players[currentPlayer].score++
-                    displayController.updateScore();
-                    displayController.updateStatusBar(gameOver.message);
-                } else if (gameOver.result ==='tie') {
-                    displayController.updateStatusBar(gameOver.message);
-                }
-            } else {
-                game.changeCurrentPlayer();
-            }
-
-        } else {
-            console.log("oops a player already placed their marker there, try again");
-        }
-    });
-});
 
 
 function getCoords(indx) {
@@ -344,12 +360,20 @@ startButton.addEventListener("click", () => {
             game.players[i].setName(val);
         }
     }
+    game.resetBoard();
+    displayController.clearDisplay();
+    const squares = document.querySelectorAll('.square');
+    squares.forEach((square) => {
+        square.addEventListener('click', game.playRound);
+    });
 
     displayController.updateStatusBar(`${game.players[0].getName()}'s turn!`);
+
 });
 
 const resetButton = document.querySelector('button[type="reset"]');
 resetButton.addEventListener("click", () => {
     game.resetBoard();
+    game.resetScore();
     displayController.clearDisplay();
 });
